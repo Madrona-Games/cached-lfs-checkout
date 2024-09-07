@@ -130,7 +130,7 @@ runs:
 
     - name: Restore LFS cache from Github
       uses: actions/cache@v4
-      if: inputs.cacheProvider == 'github' && !inputs.restoreOnly
+      if: inputs.cacheProvider == 'github' && inputs.restoreOnly == 'false'
       with:
         path: |
           .git/lfs
@@ -144,7 +144,7 @@ runs:
 
     - name: Restore Only LFS cache from Github
       uses: actions/cache/restore@v4
-      if: inputs.cacheProvider == 'github' && inputs.restoreOnly
+      if: inputs.cacheProvider == 'github' && inputs.restoreOnly == 'true'
       with:
         path: |
           .git/lfs
@@ -158,7 +158,7 @@ runs:
 
     - name: Restore LFS cache from Google Drive
       uses: madrona-games/google-drive-actions/cache@v1
-      if: inputs.cacheProvider == 'google-drive' && !inputs.restoreOnly
+      if: inputs.cacheProvider == 'google-drive' && inputs.restoreOnly == 'false'
       with:
         path: |
           .git/lfs
@@ -173,7 +173,7 @@ runs:
 
     - name: Restore Only LFS cache from Google Drive
       uses: madrona-games/google-drive-actions/cache/restore@v1
-      if: inputs.cacheProvider == 'google-drive' && inputs.restoreOnly
+      if: inputs.cacheProvider == 'google-drive' && inputs.restoreOnly == 'true'
       with:
         path: |
           .git/lfs
@@ -187,7 +187,7 @@ runs:
         google-drive-folder-id: ${{ inputs.googleDriveFolderID }}
 
     - name: Restore LFS cache from S3
-      if: inputs.cacheProvider == 's3' && !inputs.restoreOnly
+      if: inputs.cacheProvider == 's3' && inputs.restoreOnly == 'false'
       uses: madrona-games/s3-actions-cache@v1
       with:
         endpoint: ${{ inputs.s3Endpoint }}
@@ -206,7 +206,7 @@ runs:
           lfs-v3-
 
     - name: Only Restore LFS cache from S3
-      if: inputs.cacheProvider == 's3' && inputs.restoreOnly
+      if: inputs.cacheProvider == 's3' && inputs.restoreOnly == 'true'
       uses: madrona-games/s3-actions-cache/restore@v1
       with:
         endpoint: ${{ inputs.s3Endpoint }}
