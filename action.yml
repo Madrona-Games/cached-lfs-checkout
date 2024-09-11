@@ -78,6 +78,10 @@ inputs:
   s3Port:
     description: "The port of the S3 bucket to use for caching"
     required: false
+  s3Insecure:
+    description: "Whether to use insecure S3 connections"
+    required: false
+    default: false
   googleServiceAccountCredentialsJSON:
     description: "The JSON contents of the Google Service Account credentials file"
     required: false
@@ -195,6 +199,7 @@ runs:
         accessKey: ${{ inputs.s3AccessKey }}
         secretKey: ${{ inputs.s3SecretKey }}
         bucket: ${{ inputs.s3BucketName }}
+        insecure: ${{ inputs.s3Insecure }}
         use-fallback: false
         path: |
           .git/lfs
@@ -214,6 +219,7 @@ runs:
         accessKey: ${{ inputs.s3AccessKey }}
         secretKey: ${{ inputs.s3SecretKey }}
         bucket: ${{ inputs.s3BucketName }}
+        insecure: ${{ inputs.s3Insecure }}
         use-fallback: false
         path: |
           .git/lfs
