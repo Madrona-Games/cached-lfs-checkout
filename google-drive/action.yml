@@ -1,6 +1,6 @@
-name: "Cached LFS checkout"
+name: "Cached LFS checkout (Google Drive)"
 
-description: "Git checkout with LFS files from cache using GitHub Actions cache"
+description: "Git checkout with LFS files from cache using Google Drive"
 
 branding:
   icon: "download"
@@ -59,14 +59,12 @@ inputs:
       'Whether to configure the token or SSH key with the local git config'
     required: false
     default: true
-  enableCrossOsArchive:
-    description: >
-      Whether the cache is cross-os compatible. This is useful to cache dependencies which
-      are independent of the runner platform. This will help reduce the consumption of the
-      cache quota and help build for multiple platforms from the same cache.
-      [Learn more about cross-os caching](https://github.com/actions/cache/blob/main/tips-and-workarounds.md#cross-os-cache).
-    required: false
-    default: false
+  googleServiceAccountCredentialsJSON:
+    description: "The JSON contents of the Google Service Account credentials file"
+    required: true
+  googleDriveFolderID:
+    description: "The ID of the Google Drive folder to use for caching"
+    required: true
   mainBranchRefName:
     description: "The name of the main branch"
     required: false
@@ -139,23 +137,25 @@ runs:
         } >> "$GITHUB_OUTPUT"
       shell: bash
 
-    - name: Restore LFS cache from Github
-      uses: actions/cache@v5
+    - name: Restore LFS cache from Google Drive
+      uses: madrona-games/google-drive-actions/cache@v2
       if: inputs.restoreOnly == 'false'
       with:
         path: ${{ steps.cache-params.outputs.path }}
         key: ${{ steps.cache-params.outputs.key }}
         restore-keys: ${{ steps.cache-params.outputs.restore-keys }}
-        enableCrossOsArchive: ${{ inputs.enableCrossOsArchive }}
+        google-service-account-credentials-json: ${{ inputs.googleServiceAccountCredentialsJSON }}
+        google-drive-folder-id: ${{ inputs.googleDriveFolderID }}
 
-    - name: Restore Only LFS cache from Github
-      uses: actions/cache/restore@v5
+    - name: Restore Only LFS cache from Google Drive
+      uses: madrona-games/google-drive-actions/cache/restore@v2
       if: inputs.restoreOnly == 'true'
       with:
         path: ${{ steps.cache-params.outputs.path }}
         key: ${{ steps.cache-params.outputs.key }}
         restore-keys: ${{ steps.cache-params.outputs.restore-keys }}
-        enableCrossOsArchive: ${{ inputs.enableCrossOsArchive }}
+        google-service-account-credentials-json: ${{ inputs.googleServiceAccountCredentialsJSON }}
+        google-drive-folder-id: ${{ inputs.googleDriveFolderID }}
 
     - name: Git LFS Pull
       run: |

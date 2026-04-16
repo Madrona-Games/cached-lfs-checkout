@@ -1,6 +1,6 @@
-name: "Cached LFS checkout"
+name: "Cached LFS checkout (S3)"
 
-description: "Git checkout with LFS files from cache using GitHub Actions cache"
+description: "Git checkout with LFS files from cache using S3-compatible storage"
 
 branding:
   icon: "download"
@@ -59,12 +59,23 @@ inputs:
       'Whether to configure the token or SSH key with the local git config'
     required: false
     default: true
-  enableCrossOsArchive:
-    description: >
-      Whether the cache is cross-os compatible. This is useful to cache dependencies which
-      are independent of the runner platform. This will help reduce the consumption of the
-      cache quota and help build for multiple platforms from the same cache.
-      [Learn more about cross-os caching](https://github.com/actions/cache/blob/main/tips-and-workarounds.md#cross-os-cache).
+  s3Endpoint:
+    description: "The URL of the S3 bucket to use for caching"
+    required: true
+  s3AccessKey:
+    description: "The access key for the S3 bucket"
+    required: true
+  s3SecretKey:
+    description: "The secret key for the S3 bucket"
+    required: true
+  s3BucketName:
+    description: "The name of the S3 bucket to use for caching"
+    required: true
+  s3Port:
+    description: "The port of the S3 bucket to use for caching"
+    required: false
+  s3Insecure:
+    description: "Whether to use insecure S3 connections"
     required: false
     default: false
   mainBranchRefName:
@@ -139,23 +150,35 @@ runs:
         } >> "$GITHUB_OUTPUT"
       shell: bash
 
-    - name: Restore LFS cache from Github
-      uses: actions/cache@v5
+    - name: Restore LFS cache from S3
       if: inputs.restoreOnly == 'false'
+      uses: madrona-games/s3-actions-cache@v2
       with:
+        endpoint: ${{ inputs.s3Endpoint }}
+        port: ${{ inputs.s3Port }}
+        accessKey: ${{ inputs.s3AccessKey }}
+        secretKey: ${{ inputs.s3SecretKey }}
+        bucket: ${{ inputs.s3BucketName }}
+        insecure: ${{ inputs.s3Insecure }}
+        use-fallback: false
         path: ${{ steps.cache-params.outputs.path }}
         key: ${{ steps.cache-params.outputs.key }}
         restore-keys: ${{ steps.cache-params.outputs.restore-keys }}
-        enableCrossOsArchive: ${{ inputs.enableCrossOsArchive }}
 
-    - name: Restore Only LFS cache from Github
-      uses: actions/cache/restore@v5
+    - name: Restore Only LFS cache from S3
       if: inputs.restoreOnly == 'true'
+      uses: madrona-games/s3-actions-cache/restore@v2
       with:
+        endpoint: ${{ inputs.s3Endpoint }}
+        port: ${{ inputs.s3Port }}
+        accessKey: ${{ inputs.s3AccessKey }}
+        secretKey: ${{ inputs.s3SecretKey }}
+        bucket: ${{ inputs.s3BucketName }}
+        insecure: ${{ inputs.s3Insecure }}
+        use-fallback: false
         path: ${{ steps.cache-params.outputs.path }}
         key: ${{ steps.cache-params.outputs.key }}
         restore-keys: ${{ steps.cache-params.outputs.restore-keys }}
-        enableCrossOsArchive: ${{ inputs.enableCrossOsArchive }}
 
     - name: Git LFS Pull
       run: |
