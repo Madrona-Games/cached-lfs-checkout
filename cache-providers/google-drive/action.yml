@@ -1,0 +1,46 @@
+name: "Google Drive Cache Provider"
+description: "Cache LFS files using Google Drive"
+
+inputs:
+  path:
+    description: "The paths to cache"
+    required: true
+  key:
+    description: "The cache key"
+    required: true
+  restore-keys:
+    description: "The restore keys"
+    required: true
+  restoreOnly:
+    description: "Only restore the cache, do not save the cache"
+    required: false
+    default: false
+  google-service-account-credentials-json:
+    description: "The JSON contents of the Google Service Account credentials file"
+    required: true
+  google-drive-folder-id:
+    description: "The ID of the Google Drive folder to use for caching"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Restore LFS cache from Google Drive
+      uses: madrona-games/google-drive-actions/cache@v2
+      if: inputs.restoreOnly == 'false'
+      with:
+        path: ${{ inputs.path }}
+        key: ${{ inputs.key }}
+        restore-keys: ${{ inputs.restore-keys }}
+        google-service-account-credentials-json: ${{ inputs.google-service-account-credentials-json }}
+        google-drive-folder-id: ${{ inputs.google-drive-folder-id }}
+
+    - name: Restore Only LFS cache from Google Drive
+      uses: madrona-games/google-drive-actions/cache/restore@v2
+      if: inputs.restoreOnly == 'true'
+      with:
+        path: ${{ inputs.path }}
+        key: ${{ inputs.key }}
+        restore-keys: ${{ inputs.restore-keys }}
+        google-service-account-credentials-json: ${{ inputs.google-service-account-credentials-json }}
+        google-drive-folder-id: ${{ inputs.google-drive-folder-id }}
